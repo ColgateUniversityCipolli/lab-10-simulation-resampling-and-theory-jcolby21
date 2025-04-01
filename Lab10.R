@@ -120,7 +120,7 @@ p_values <- seq(0.01, 0.99, by=0.01)  # Proportions
 #data for each n and p
 moe_data <- expand.grid(n = n_values, p = p_values) %>%
   mutate(
-    moe = z * sqrt((n * p * (1 - p) + (z^2) / 4) / (n + z^2))
+    moe = z * sqrt((n * p * (1 - p) + (z^2) / 4)) / (n + z^2)
   )
 
 ggplot(moe_data, aes(x = n, y = p, fill = moe)) +
