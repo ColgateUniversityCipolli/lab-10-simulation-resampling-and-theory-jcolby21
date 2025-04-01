@@ -73,3 +73,42 @@ range_95_resample <- quantile(df_resamples$proportion, c(0.025, 0.975))
 margin_of_error_resample <- diff(range_95_resample) / 2
 #Middle 95% was from 0.36 to 0.42
 #Margin of error is approximately 0.03, Gallup reported 4% (0.04)
+
+
+#Simulation over n and p
+
+n_values <- seq(100, 3000, by = 10)  # Sample sizes from 100 to 3000
+p_values <- seq(0.01, 0.99, by = 0.01)  # Probabilities from 0.01 to 0.99
+num_simulations <- 10000  # Number of simulations
+
+
+simulate_margin_of_error <- function(n, p, num_simulations) {
+  
+  sample_data <- rbinom(num_simulations, size = n, prob = p) / n
+  
+  # Calculate the 2.5th and 97.5th percentiles
+  lower <- quantile(sample_data, 0.025)
+  upper <- quantile(sample_data, 0.975)
+  
+  # Half the range between the 2.5th and 97.5th percentiles
+  margin_of_error <- (upper - lower) / 2
+  return(margin_of_error)
+}
+
+# Empty data frame
+results <- expand.grid(n = n_values, p = p_values)
+
+# Apply the simulation function to each combination of n and p
+results$margin_of_error <- mapply(simulate_margin_of_error, results$n, results$p, MoreArgs = list(num_simulations = num_simulations))
+
+ggplot(results, aes(x = n, y = p, fill = margin_of_error)) +
+  geom_raster() +
+  scale_fill_viridis_c(option = "C", name = "Margin of Error") +
+  labs(
+    title = "Margin of Error vs. Sample Size and Probability",
+    x = "Sample Size (n)",
+    y = "Probability (p)"
+  ) +
+  theme_minimal()
+
+#Actual Margin of Error Calculation
