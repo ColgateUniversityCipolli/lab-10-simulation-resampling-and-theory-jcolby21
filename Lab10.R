@@ -112,3 +112,21 @@ ggplot(results, aes(x = n, y = p, fill = margin_of_error)) +
   theme_minimal()
 
 #Actual Margin of Error Calculation
+
+z <- 1.96  # 95% confidence level
+n_values <- seq(100, 2000, by=10)  # Sample sizes
+p_values <- seq(0.01, 0.99, by=0.01)  # Proportions
+
+#data for each n and p
+moe_data <- expand.grid(n = n_values, p = p_values) %>%
+  mutate(
+    moe = z * sqrt((n * p * (1 - p) + (z^2) / 4) / (n + z^2))
+  )
+
+ggplot(moe_data, aes(x = n, y = p, fill = moe)) +
+  geom_raster() +
+  scale_fill_viridis_c(name="Margin of Error") +
+  labs(title="Wilson Margin of Error",
+       x="Sample Size (n)",
+       y="Proportion (p)") +
+  theme_minimal()
