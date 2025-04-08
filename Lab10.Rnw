@@ -40,6 +40,9 @@
 \begin{multicols}{2}
 
 \section{Introduction}
+A polling company Gallup conducted a study on whether or not 1004 adults were satisfied or not with the postion of the United States. 39\% of respondents said they were satisfied and Gallup reported a $\pm$ 4\% margin of error. Gallup mentions that by increaseing the poll size to 2000, the results would be accurate within $\pm$ 2\%. This claim by Gallup is what leads us to the question for the lab, testing the claim of Gallup that increasing the sample size by double would decrease the margin of error by a half.
+
+Utilizing packages such as tidyverse \citep{tidyverse} and ggplot2 \citep{ggplot2}, the following steps were conducted to test whether Gallup's method of calculating margin of error for their polls is correct. A basic simulation of two samples sizes n=1000 and n=2000 was conducted to see if the population value of 0.39 followed the claim of Gallup in their conducting of polls. Resampling was then used to find an approximation for \emph{p} hat to compare the margin of errors. To further test Gallup we then simulated of different n and \emph{p}, and finally calculated the actual margin of error using Wilson's Estimate.
 
 \section{Basic Simulation}
 
@@ -187,6 +190,8 @@ As seen in the figure above, Gallup mentioning the sample size as the sole facto
 
 \section{Actual Margin of Error}
 
+This plot visualizes the margin of error for different combinations of sample sizes ($n$) and proportions ($p$), using the Wilson Margin of Error.
+
 <<fig.width=4, fig.height=2, echo=FALSE, message=FALSE, warning=FALSE>>=
 library(tidyverse)
 library(ggplot2)
@@ -210,7 +215,12 @@ ggplot(moe_data, aes(x = n, y = p, fill = moe)) +
        y="Proportion (p)") +
   theme_minimal()
 @
+
+Similarly to the simulation over n and \emph{p}, the actual margin of error using the Wilson Estimare paints a similar picutre. The plots follow a similar pattern, ultimately showing that Gallup's story is not as straightforward as they mention. The sample size does decrease the margin of error as n increases, however \emph{p} also plays a factor in the margin of error. Similarly to before the values of \emph{p} closer to the extremes of 0 and 1 have lower margin of errors since the values can not go outside the parameter space of [0,1].
+
 \section{Results}
+Wilson's claim that doubling the sample size from 1000 to 2000 would decrease the margin of error from $\pm$ 4\% to $\pm$ 2\% is not as simple as they claim. This is primarily shown from the Simulation over n and \emph{p} and the Actual Margin of Error Calculation utilizing Wilson's Estimate. The sample size is not the only factor in determining the margin of error, the proportion \emph{p} also playing a role. This suggests that Gallup's claim is not true, or at a minimum it is not true for all values of \emph{p}.
+
 
 \begin{tiny}
 \bibliography{bib}
