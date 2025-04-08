@@ -43,12 +43,173 @@
 
 \section{Basic Simulation}
 
+This analysis compares the sampling distribution of sample proportions from 10,000 simulated polls at two different sample sizes: 1000 and 2000, assuming a true satisfaction rate of 39\%.
+
+<<fig.width=3.5, fig.height=2, echo=FALSE, message=FALSE, warning=FALSE, results='hold'>>=
+# Load libraries
+library(ggplot2)
+library(dplyr)
+
+p_true <- 0.39
+n1 <- 1000
+n2 <- 2000
+num_polls <- 10000
+
+# Simulations for n = 1000
+polls1 <- rbinom(num_polls, n1, p_true) / n1
+df1 <- data.frame(proportion = polls1)
+
+# Plot for n = 1000
+ggplot(df1, aes(x = proportion)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "lightblue", color = "white", alpha = 0.7) +
+  geom_density(color = "red", linewidth = 1.2) +
+  labs(
+    title = "Sampling Distribution of Proportion (n = 1000)",
+    x = "Sample Proportion",
+    y = "Density"
+  ) +
+  theme_minimal()
+
+# Margin of error for n = 1000
+range_95_1 <- quantile(polls1, c(0.025, 0.975))
+margin_of_error_1 <- diff(range_95_1) / 2
+
+# Simulations for n = 2000
+polls2 <- rbinom(num_polls, n2, p_true) / n2
+df2 <- data.frame(proportion = polls2)
+
+# Plot for n = 2000
+ggplot(df2, aes(x = proportion)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "lightgreen", color = "white", alpha = 0.7) +
+  geom_density(color = "blue", linewidth = 1.2) +
+  labs(
+    title = "Sampling Distribution of Proportion (n = 2000)",
+    x = "Sample Proportion",
+    y = "Density"
+  ) +
+  theme_minimal()
+
+# Margin of error for n = 2000
+range_95_2 <- quantile(polls2, c(0.025, 0.975))
+margin_of_error_2 <- diff(range_95_2) / 2
+@
+
+The shape of the sampling distribution for a sample size of 1000 forms an almost normal bell-shaped curve. The middle 95\% of the data fell between 0.36 and 0.42, meaning it had a margin of error of 0.03, which is slightly less than the 0.04 (4\%) that Gallup reported.
+
+The shape of the sampling distribution for a sample size of 2000 also formed an almost normal bell-shaped curve. The data in this sample was a little bit more centralized around the assumed population mean. The middle 95\% of the data fell between 0.369 and 0.411, meaning it had a margin of error of 0.021, which is very close to the 0.02 (2\%) that Gallup reported.
+
 \section{Resampling}
+
+This analysis uses resampling to simulate the distribution of the sample proportion from a Gallup survey where 39\% of respondents are satisfied.
+
+<<rfig.width=4, fig.height=2, echo=FALSE, message=FALSE, warning=FALSE>>=
+library(tidyverse)
+library(ggplot2)
+
+n_survey <- 1000               # Sample size
+num_resamples <- 10000         # Number of bootstrap resamples
+
+# Generate original survey data: 39% satisfied (1), 61% not (0)
+survey_data <- c(rep(1, 0.39 * n_survey), rep(0, n_survey - 0.39 * n_survey))
+
+resample_proportions <- numeric(num_resamples)
+
+for (i in 1:num_resamples) {
+  resample <- sample(survey_data, n_survey, replace = TRUE)
+  resample_proportions[i] <- mean(resample)
+}
+
+#convert to tibble to plot
+df_resamples <- tibble(proportion = resample_proportions)
+
+ggplot(df_resamples, aes(x = proportion)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "lightblue", color = "white", alpha = 0.7) +
+  geom_density(color = "red", linewidth = 1.2) +
+  labs(
+    title = "Sampling Distribution of Proportion (Resampling)",
+    x = "Sample Proportion",
+    y = "Density"
+  ) +
+  theme_minimal()
+
+# Calculate middle 95% range and margin of error
+range_95_resample <- quantile(df_resamples$proportion, c(0.025, 0.975))
+margin_of_error_resample <- diff(range_95_resample) / 2
+@
+
+The resampling approach produced a normal bell shaped curve like the samples above, however the data fits the curve a little better than the basic simulation. The middle 95\% of the data fell between 0.36 and 0.42 leading to a margin of error of approximately 0.03, which is less than the 0.04 (4\%) that Gallup reported. This number is approximately the same number calculated from the data in the basic simulation for sample size of 1000. 
 
 \section{Simulation over n and p}
 
+This plot uses simulation to estimate the margin of error for different combinations of sample size ($n$) and true proportion ($p$), based on 10,000 binomial trials per combination.
+
+<<fig.width=4, fig.height=2, echo=FALSE, message=FALSE, warning=FALSE>>=
+# Load libraries
+library(tidyverse)
+library(ggplot2)
+library(viridis)
+
+n_values <- seq(100, 3000, by = 10)        # Sample sizes
+p_values <- seq(0.01, 0.99, by = 0.01)     # Probabilities
+num_simulations <- 10000                   # Number of simulations
+
+# Function to simulate margin of error
+simulate_margin_of_error <- function(n, p, num_simulations) {
+  sample_data <- rbinom(num_simulations, size = n, prob = p) / n
+  lower <- quantile(sample_data, 0.025)
+  upper <- quantile(sample_data, 0.975)
+  (upper - lower) / 2
+}
+
+# Empty data frame
+results <- expand.grid(n = n_values, p = p_values)
+
+# Apply simulation
+results$margin_of_error <- mapply(
+  simulate_margin_of_error, 
+  results$n, 
+  results$p, 
+  MoreArgs = list(num_simulations = num_simulations)
+)
+
+ggplot(results, aes(x = n, y = p, fill = margin_of_error)) +
+  geom_raster() +
+  scale_fill_viridis_c(option = "C", name = "Margin of Error") +
+  labs(
+    title = "Margin of Error vs. Sample Size and Probability",
+    x = "Sample Size (n)",
+    y = "Probability (p)"
+  ) +
+  theme_minimal()
+@
+
+As seen in the figure above, Gallup mentioning the sample size as the sole factor in changing the margin of error is not completely true. The sample size does play a role in determining the margin of error, but the proportion \emph{p} also plays a role. When \emph{p} is close to the extremes (0 or 1) the margin of error is smaller for the same sample size. This is due to not being able to expand beyond the parameter space of [0,1].
+
 \section{Actual Margin of Error}
 
+<<fig.width=4, fig.height=2, echo=FALSE, message=FALSE, warning=FALSE>>=
+library(tidyverse)
+library(ggplot2)
+library(viridis)
+
+z <- 1.96  # 95% confidence level
+n_values <- seq(100, 2000, by=10)  # Sample sizes
+p_values <- seq(0.01, 0.99, by=0.01)  # Proportions
+
+# data for each n and p
+moe_data <- expand.grid(n = n_values, p = p_values) %>%
+  mutate(
+    moe = z * sqrt((n * p * (1 - p) + (z^2) / 4)) / (n + z^2)
+  )
+
+ggplot(moe_data, aes(x = n, y = p, fill = moe)) +
+  geom_raster() +
+  scale_fill_viridis_c(name="Margin of Error") +
+  labs(title="Wilson Margin of Error",
+       x="Sample Size (n)",
+       y="Proportion (p)") +
+  theme_minimal()
+@
 \section{Results}
 
 \begin{tiny}

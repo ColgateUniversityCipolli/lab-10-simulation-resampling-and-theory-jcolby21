@@ -94,12 +94,47 @@
 
 \section{Basic Simulation}
 
+This analysis compares the sampling distribution of sample proportions from 10,000 simulated polls at two different sample sizes: 1000 and 2000, assuming a true satisfaction rate of 39\%.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-1-1} 
+
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-1-2} 
+\end{knitrout}
+
+The shape of the sampling distribution for a sample size of 1000 forms an almost normal bell-shaped curve. The middle 95\% of the data fell between 0.36 and 0.42, meaning it had a margin of error of 0.03, which is slightly less than the 0.04 (4\%) that Gallup reported.
+
+The shape of the sampling distribution for a sample size of 2000 also formed an almost normal bell-shaped curve. The data in this sample was a little bit more centralized around the assumed population mean. The middle 95\% of the data fell between 0.369 and 0.411, meaning it had a margin of error of 0.021, which is very close to the 0.02 (2\%) that Gallup reported.
+
 \section{Resampling}
+
+This analysis uses resampling to simulate the distribution of the sample proportion from a Gallup survey where 39\% of respondents are satisfied.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-2-1} 
+\end{knitrout}
+
+The resampling approach produced a normal bell shaped curve like the samples above, however the data fits the curve a little better than the basic simulation. The middle 95\% of the data fell between 0.36 and 0.42 leading to a margin of error of approximately 0.03, which is less than the 0.04 (4\%) that Gallup reported. This number is approximately the same number calculated from the data in the basic simulation for sample size of 1000. 
 
 \section{Simulation over n and p}
 
+This plot uses simulation to estimate the margin of error for different combinations of sample size ($n$) and true proportion ($p$), based on 10,000 binomial trials per combination.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-3-1} 
+\end{knitrout}
+
+As seen in the figure above, Gallup mentioning the sample size as the sole factor in changing the margin of error is not completely true. The sample size does play a role in determining the margin of error, but the proportion \emph{p} also plays a role. When \emph{p} is close to the extremes (0 or 1) the margin of error is smaller for the same sample size. This is due to not being able to expand beyond the parameter space of [0,1].
+
 \section{Actual Margin of Error}
 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-4-1} 
+\end{knitrout}
 \section{Results}
 
 \begin{tiny}
